@@ -2,7 +2,8 @@
 
 import { ArrowDownToLine, Link2, LoaderCircle, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { SyntheticEvent } from 'react';
+import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -41,7 +42,7 @@ export default function Home() {
     return result;
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
       await resolveVideo(url);
@@ -81,10 +82,10 @@ export default function Home() {
       <div className="signal-grid" aria-hidden="true" />
 
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-        <a href="/" className="flex items-center gap-3" aria-label="一贴即下首页">
+        <Link href="/" className="flex items-center gap-3" aria-label="一贴即下首页">
           <span className="logo-mark"><ArrowDownToLine size={19} strokeWidth={2.4} /></span>
           <span className="font-heading text-lg font-semibold tracking-[-0.03em]">一贴即下</span>
-        </a>
+        </Link>
         <span className="status-pill"><span /> 服务在线</span>
       </header>
 
