@@ -32,7 +32,8 @@ export default function Home() {
     setMessage('正在读取视频信息…');
     setVideo(null);
 
-    const response = await fetch(`/api/video?url=${encodeURIComponent(input)}`);
+    try {
+    const response = await fetch(`/api/video?url=${encodeURIComponent(input)}`, { signal: AbortSignal.timeout(65000) });
     const result = await response.json() as Video & { error?: string };
     if (!response.ok) throw new Error(result.error || '解析失败，请稍后重试');
 
@@ -40,6 +41,11 @@ export default function Home() {
     setStatus('ready');
     setMessage('链接已识别，可以下载');
     return result;
+    } catch (error) {
+      setStatus('error');
+      setMessage(error instanceof Error ? error.message : '网络连接失败，请重试');
+      throw error;
+    }
   }
 
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
@@ -68,7 +74,7 @@ export default function Home() {
       },
       annotations: { readOnlyHint: true, untrustedContentHint: true },
       async execute(input) {
-        const toolUrl = (input as { url?: unknown }).url;
+        const toolUrl = (input as { url?: unknown } | null)?.url;
         if (typeof toolUrl !== 'string' || !toolUrl.trim()) throw new Error('需要一个抖音视频链接');
         setUrl(toolUrl);
         return resolveVideo(toolUrl);
@@ -96,23 +102,25 @@ export default function Home() {
             贴链接，<br /><span>拿视频。</span>
           </h1>
           <p className="mt-7 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            支持抖音短链接和视频页链接。粘贴后解析，下载可获取的视频文件。
+            短链接、视频页链接、完整分享文案，都可以直接粘贴。自动提取其中的抖音视频链接。
           </p>
 
           <form onSubmit={handleSubmit} className="download-panel mt-10">
             <label htmlFor="video-url" className="mb-3 block text-sm font-medium text-zinc-300">
-              抖音视频链接
+              抖音链接或分享文案
             </label>
             <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
                 <Link2 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={20} />
                 <Input
                   id="video-url"
-                  type="url"
+                  type="text"
+                  maxLength={8000}
                   required
                   value={url}
-                  onChange={(event) => setUrl(event.target.value)}
-                  placeholder="https://v.douyin.com/…"
+                  disabled={status === 'loading'}
+                  onChange={(event) => { setUrl(event.target.value); setVideo(null); setStatus('idle'); setMessage(''); }}
+                  placeholder="粘贴链接，或直接粘贴抖音分享文案"
                   className="h-14 rounded-none border-zinc-700 bg-zinc-950 pl-12 text-base text-white placeholder:text-zinc-600 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
                 />
               </div>
