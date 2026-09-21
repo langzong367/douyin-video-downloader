@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="粘贴抖音链接或分享文案，下载公开可访问的视频。">
+  <title>一贴即下｜抖音视频下载</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0b0c;--fg:#f5f4ef;--muted:#9b9b9f;--line:#343438;--orange:#f97316;font-family:"PingFang SC","Noto Sans SC",sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);min-height:100vh}.grid{position:fixed;inset:0;pointer-events:none;opacity:.42;background-image:linear-gradient(#ffffff09 1px,transparent 1px),linear-gradient(90deg,#ffffff09 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(circle at 65% 42%,#000 0,transparent 68%)}
+    header,main{width:min(100% - 40px,1152px);margin:auto}header{height:88px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:700}.mark{display:grid;place-items:center;width:38px;height:38px;background:var(--orange);color:#0b0b0c;transform:rotate(-3deg)}.online{display:flex;align-items:center;gap:8px;border:1px solid #2f2f32;padding:7px 11px;color:#8c8c91;font-size:12px;letter-spacing:.04em}.online i{width:7px;height:7px;border-radius:50%;background:#38d27a;box-shadow:0 0 12px #38d27aaa}
+    main{min-height:calc(100vh - 88px);display:grid;align-items:center;padding:32px 0 80px}.wrap{max-width:768px}.eyebrow{color:var(--orange);font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.16em}.hero{margin:20px 0 0;font-family:"Arial Narrow","PingFang SC",sans-serif;font-size:clamp(52px,9vw,112px);font-weight:900;line-height:.88;letter-spacing:-.075em}.hero span{color:transparent;-webkit-text-stroke:1.5px var(--fg)}.lead{max-width:620px;margin:28px 0 0;color:var(--muted);font-size:18px;line-height:1.75}
+    .panel{position:relative;margin-top:40px;padding:24px;border:1px solid #303034;background:#121214e6;box-shadow:18px 18px 0 var(--orange)}.panel:before{content:"";position:absolute;left:-1px;top:-1px;width:88px;height:4px;background:var(--orange)}label{display:block;margin-bottom:12px;color:#d4d4d8;font-size:14px;font-weight:600}.form-row{display:flex;gap:12px}.input-wrap{position:relative;flex:1}.link-icon{position:absolute;left:16px;top:18px;color:#71717a}.input{width:100%;height:56px;border:1px solid #3f3f46;border-radius:0;background:#09090b;padding:0 16px 0 48px;color:#fff;font:inherit;font-size:16px;outline:none}.input:focus{border-color:var(--orange);box-shadow:0 0 0 3px #f9731633}.button{height:56px;border:0;border-radius:0;background:var(--orange);padding:0 28px;color:#080808;font:700 16px inherit;cursor:pointer}.button:hover{background:#fb923c}.button:disabled{cursor:wait;opacity:.65}.status{min-height:24px;margin-top:20px;color:#a1a1aa;font-size:14px}.status.error{color:#f87171}.result{display:none;align-items:center;justify-content:space-between;gap:16px;margin-top:20px;padding-top:20px;border-top:1px solid #27272a}.result.show{display:flex}.result-copy{min-width:0}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.id{margin-top:5px;color:#71717a;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}.download{height:44px;flex:none;border:0;background:#fff;padding:0 20px;color:#09090b;font:700 15px inherit;cursor:pointer}.note{margin-top:28px;border-left:2px solid #3f3f46;padding-left:16px;color:#71717a;font-size:14px;line-height:1.7}
+    @media(max-width:640px){header,main{width:min(100% - 32px,1152px)}.lead{font-size:16px}.panel{padding:20px;box-shadow:9px 9px 0 var(--orange)}.form-row{flex-direction:column}.button{width:100%}.result{align-items:flex-start;flex-direction:column}.download{width:100%}}
+    @media(prefers-reduced-motion:no-preference){.panel,.hero{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}.hero{animation-delay:.08s}@keyframes rise{from{opacity:0;transform:translateY(16px)}}}
+  </style>
+</head>
+<body>
+  <div class="grid" aria-hidden="true"></div>
+  <header><div class="brand"><span class="mark" aria-hidden="true">↓</span>一贴即下</div><span class="online"><i></i>服务在线</span></header>
+  <main><section class="wrap">
+    <p class="eyebrow">DOUYIN VIDEO DOWNLOADER / 01</p>
+    <h1 class="hero">贴链接，<br><span>拿视频。</span></h1>
+    <p class="lead">短链接、视频页链接、完整分享文案，都可以直接粘贴。自动提取其中的抖音视频链接。</p>
+    <form class="panel" id="form">
+      <label for="video-url">抖音链接或分享文案</label>
+      <div class="form-row"><div class="input-wrap"><span class="link-icon" aria-hidden="true">↗</span><input class="input" id="video-url" maxlength="8000" required placeholder="粘贴链接，或直接粘贴抖音分享文案"></div><button class="button" id="submit" type="submit">解析视频</button></div>
+      <div class="status" id="status" aria-live="polite">粘贴公开可访问的视频链接</div>
+      <div class="result" id="result"><div class="result-copy"><div class="title" id="title"></div><div class="id" id="video-id"></div></div><button class="download" id="download" type="button">↓ 下载 MP4</button></div>
+    </form>
+    <p class="note">请仅下载你有权保存的内容。私密、已删除或受地区限制的视频无法解析。</p>
+  </section></main>
+  <script>
+    const form=document.querySelector('#form'),input=document.querySelector('#video-url'),submit=document.querySelector('#submit'),status=document.querySelector('#status'),result=document.querySelector('#result'),title=document.querySelector('#title'),videoId=document.querySelector('#video-id'),download=document.querySelector('#download');let video;
+    const setStatus=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error)};
+    input.addEventListener('input',()=>{video=null;result.classList.remove('show');setStatus('粘贴公开可访问的视频链接')});
+    form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='解析中…';result.classList.remove('show');setStatus('正在读取视频信息…');try{const response=await fetch('/api/video?url='+encodeURIComponent(input.value),{signal:AbortSignal.timeout(65000)});const data=await response.json();if(!response.ok)throw new Error(data.error||'解析失败，请稍后重试');video=data;title.textContent=data.title;videoId.textContent='ID '+data.id;result.classList.add('show');setStatus('链接已识别，可以下载')}catch(error){setStatus(error.message||'网络连接失败，请重试',true)}finally{submit.disabled=false;submit.textContent='解析视频'}});
+    download.addEventListener('click',async()=>{if(!video)return;download.disabled=true;download.textContent='正在下载…';setStatus('正在从抖音读取视频，请不要关闭页面…');try{const response=await fetch(video.downloadUrl,{signal:AbortSignal.timeout(30000)});const media=await response.json();if(!response.ok)throw new Error(media.error||'下载准备失败');const file=await fetch(media.url);if(!file.ok)throw new Error('视频文件读取失败');const objectUrl=URL.createObjectURL(await file.blob());const anchor=document.createElement('a');anchor.href=objectUrl;anchor.download=media.filename;document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);setStatus('下载已开始')}catch(error){setStatus(error.message||'下载失败，请重试',true)}finally{download.disabled=false;download.textContent='↓ 下载 MP4'}});
+  </script>
+</body>
+</html>
