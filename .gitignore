@@ -36,6 +36,7 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+*.tsbuildinfo
 
 # Local Netlify folder
 .netlify

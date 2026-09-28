@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="抖音公开链接在线下载；飞书文档视频可使用配套 Chrome 扩展保存。">
+  <meta name="description" content="抖音公开视频在线下载；B站、飞书和普通网页直链视频使用配套 Chrome 扩展保存。">
   <title>一贴即下｜视频下载</title>
   <style>
     :root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;color:#18181b;background:#fafafa}
@@ -18,23 +18,24 @@
   <header><div class="brand"><span class="mark" aria-hidden="true">↓</span>一贴即下</div></header>
   <main><section class="wrap">
     <h1 class="hero">粘贴链接，轻松保存视频</h1>
-    <p class="lead">粘贴抖音链接、分享文案或飞书文档链接。</p>
+    <p class="lead">粘贴抖音、B站、飞书链接，或包含视频的网页地址。</p>
     <form class="panel" id="form">
       <label for="video-url">视频链接或分享文案</label>
-      <div class="form-row"><div class="input-wrap"><input class="input" id="video-url" maxlength="8000" required placeholder="粘贴抖音或飞书文档链接"></div><button class="button" id="submit" type="submit">解析视频</button></div>
-      <div class="status" id="status" aria-live="polite">粘贴公开可访问的视频链接</div>
+      <div class="form-row"><div class="input-wrap"><input class="input" id="video-url" maxlength="8000" required placeholder="粘贴视频链接或整段分享文案"></div><button class="button" id="submit" type="submit">识别链接</button></div>
+      <div class="status" id="status" aria-live="polite">抖音可网页下载；其他页面需 Chrome 扩展</div>
       <div class="result" id="result"><div class="result-copy"><div class="title" id="title"></div><div class="id" id="video-id"></div></div><button class="download" id="download" type="button">↓ 下载 MP4</button></div>
     </form>
-    <div class="feishu-help"><strong>飞书视频需要 Chrome 扩展</strong><br><a href="/feishu-extension.zip" download>下载扩展</a>并解压；打开 Chrome 的 <code>chrome://extensions</code>，开启“开发者模式”，选择“加载已解压的扩展程序”并选中解压后的 <code>extension</code> 文件夹。在已登录的飞书文档中播放视频，再点击扩展图标下载。</div>
-    <p class="note">请仅保存你有权下载的内容。扩展只识别已播放的飞书视频；受权限、播放保护或平台变更影响的视频可能无法保存。</p>
+    <div class="feishu-help"><strong>B站、飞书及普通网页视频需要 Chrome 扩展</strong><br><a href="/feishu-extension.zip" download>下载扩展</a>并解压；打开 Chrome 的 <code>chrome://extensions</code>，开启“开发者模式”，选择“加载已解压的扩展程序”并选中 <code>extension</code> 文件夹。打开视频页面，必要时先播放，再点击扩展图标下载。</div>
+    <p class="note">请仅保存你有权下载的内容。B站支持公开可获取的带声视频；普通网页支持可直接获取的 MP4/WebM 等文件。分段流、DRM 或受权限限制的视频不保证可用。</p>
   </section></main>
   <script>
     const form=document.querySelector('#form'),input=document.querySelector('#video-url'),submit=document.querySelector('#submit'),status=document.querySelector('#status'),result=document.querySelector('#result'),title=document.querySelector('#title'),videoId=document.querySelector('#video-id'),download=document.querySelector('#download');let video;
     const setStatus=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error)};
     const feishuLink=(text)=>{const match=text.match(/(?:https?:\/\/)?[a-z0-9-]+\.feishu\.cn\/(?:wiki|docx)\/[A-Za-z0-9]+(?:#[A-Za-z0-9-]+)?/i);return match?new URL(/^https?:/i.test(match[0])?match[0]:'https://'+match[0]).href:null};
+    const pageLink=(text)=>{const match=text.match(/(?:https?:\/\/)?(?:www\.|m\.)?bilibili\.com\/video\/(?:BV[A-Za-z0-9]{10}|av\d+)\/?(?:\?[^\s<>"'，。！？、；;]*)?/i)||text.match(/(?:https?:\/\/)?b23\.tv\/[A-Za-z0-9]+/i)||text.match(/https?:\/\/[^\s<>"']+/i);if(!match)return null;try{return new URL((/^https?:/i.test(match[0])?match[0]:'https://'+match[0]).replace(/[)\]，。！？、；;]+$/g,'')).href}catch{return null}};
     input.addEventListener('input',()=>{video=null;result.classList.remove('show');download.textContent='↓ 下载 MP4';setStatus('粘贴视频链接或分享文案')});
-    form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='解析中…';result.classList.remove('show');setStatus('正在识别链接…');try{const link=feishuLink(input.value);if(link){video={feishu:true,url:link};title.textContent='飞书文档视频';videoId.textContent='需在已登录的 Chrome 页面播放';download.textContent='打开飞书文档';result.classList.add('show');setStatus('打开文档并播放视频，然后点击浏览器中的扩展图标');return}if(/feishu\.cn/i.test(input.value))throw new Error('请粘贴飞书 wiki 或 docx 文档链接');const response=await fetch('/api/video?url='+encodeURIComponent(input.value),{signal:AbortSignal.timeout(65000)});const data=await response.json();if(!response.ok)throw new Error(data.error||'解析失败，请稍后重试');video=data;title.textContent=data.title;videoId.textContent='ID '+data.id;download.textContent='↓ 下载 MP4';result.classList.add('show');setStatus('链接已识别，可以下载')}catch(error){setStatus(error.message||'网络连接失败，请重试',true)}finally{submit.disabled=false;submit.textContent='解析视频'}});
-    download.addEventListener('click',async()=>{if(!video)return;if(video.feishu){window.open(video.url,'_blank','noopener');setStatus('在飞书页面播放视频后，点击一贴即下扩展图标下载');return}download.disabled=true;download.textContent='正在下载…';setStatus('正在从抖音读取视频，请不要关闭页面…');try{const response=await fetch(video.downloadUrl,{signal:AbortSignal.timeout(30000)});const media=await response.json();if(!response.ok)throw new Error(media.error||'下载准备失败');const file=await fetch(media.url);if(!file.ok)throw new Error('视频文件读取失败');const objectUrl=URL.createObjectURL(await file.blob());const anchor=document.createElement('a');anchor.href=objectUrl;anchor.download=media.filename;document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);setStatus('下载已开始')}catch(error){setStatus(error.message||'下载失败，请重试',true)}finally{download.disabled=false;download.textContent='↓ 下载 MP4'}});
+    form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='识别中…';result.classList.remove('show');setStatus('正在识别链接…');try{const feishu=feishuLink(input.value),link=feishu||pageLink(input.value),host=link?new URL(link).hostname:'';if(feishu||link&&!/(^|\.)(?:douyin|iesdouyin)\.com$/i.test(host)){video={page:true,url:link};title.textContent=feishu?'飞书文档视频':/(^|\.)(?:bilibili\.com|b23\.tv)$/i.test(host)?'B站视频':'网页视频';videoId.textContent='在 Chrome 打开页面并点击扩展图标';download.textContent='打开视频页面';result.classList.add('show');setStatus('打开页面并播放视频，再点击一贴即下扩展下载');return}if(/feishu\.cn/i.test(input.value))throw new Error('请粘贴飞书 wiki 或 docx 文档链接');const response=await fetch('/api/video?url='+encodeURIComponent(input.value),{signal:AbortSignal.timeout(65000)});const data=await response.json();if(!response.ok)throw new Error(data.error||'解析失败，请稍后重试');video=data;title.textContent=data.title;videoId.textContent='ID '+data.id;download.textContent='↓ 下载 MP4';result.classList.add('show');setStatus('链接已识别，可以下载')}catch(error){setStatus(error.message||'网络连接失败，请重试',true)}finally{submit.disabled=false;submit.textContent='识别链接'}});
+    download.addEventListener('click',async()=>{if(!video)return;if(video.page){window.open(video.url,'_blank','noopener');setStatus('在视频页面播放后，点击一贴即下扩展图标下载');return}download.disabled=true;download.textContent='正在下载…';setStatus('正在从抖音读取视频，请不要关闭页面…');try{const response=await fetch(video.downloadUrl,{signal:AbortSignal.timeout(30000)});const media=await response.json();if(!response.ok)throw new Error(media.error||'下载准备失败');const file=await fetch(media.url);if(!file.ok)throw new Error('视频文件读取失败');const objectUrl=URL.createObjectURL(await file.blob());const anchor=document.createElement('a');anchor.href=objectUrl;anchor.download=media.filename;document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);setStatus('下载已开始')}catch(error){setStatus(error.message||'下载失败，请重试',true)}finally{download.disabled=false;download.textContent='↓ 下载 MP4'}});
   </script>
 </body>
 </html>

@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "一贴即下 · 飞书视频",
-  "version": "0.1.0",
-  "description": "从当前已登录的飞书文档下载已播放的视频。",
-  "permissions": ["downloads", "storage", "webRequest"],
-  "host_permissions": ["https://*.feishu.cn/*"],
+  "name": "一贴即下 · 视频下载",
+  "version": "0.2.0",
+  "description": "下载飞书、B站和普通网页中可直接获取的视频。",
+  "permissions": ["downloads", "storage", "webRequest", "activeTab", "scripting", "declarativeNetRequestWithHostAccess"],
+  "host_permissions": ["https://*.feishu.cn/*", "https://*.bilivideo.com/*", "https://*.bilivideo.cn/*"],
   "background": { "service_worker": "background.js", "type": "module" },
-  "action": { "default_title": "下载飞书视频", "default_popup": "popup.html" }
+  "declarative_net_request": { "rule_resources": [{ "id": "bilibili_referer", "enabled": true, "path": "bilibili-referer.json" }] },
+  "action": { "default_title": "下载当前视频", "default_popup": "popup.html" }
 }

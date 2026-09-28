@@ -12,3 +12,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 chrome.tabs.onRemoved.addListener((tabId) => {
   void chrome.storage.session.remove(`video:${tabId}`);
 });
+
+chrome.tabs.onUpdated.addListener((tabId, change) => {
+  if (change.status === 'loading' || change.url) void chrome.storage.session.remove(`video:${tabId}`);
+});
