@@ -1,8 +1,8 @@
 # 一贴即下
 
-一个简单的抖音公开视频下载工具。粘贴抖音短链接或视频页链接，解析成功后即可下载 MP4。
+一个轻量的视频下载工具：抖音公开视频直接在网页下载；飞书文档视频通过已登录的 Chrome 扩展下载。
 
-**在线使用：** [yitie-jixia.zejunchu.chatgpt.site](https://yitie-jixia.zejunchu.chatgpt.site)
+**在线使用：** [yitie-jixia-cn.netlify.app](https://yitie-jixia-cn.netlify.app)
 
 ## 功能
 
@@ -11,8 +11,15 @@
 - 对分享页进行最多三次请求并保留响应 Cookie；超时、上游校验不再误报为视频删除
 - 下载复用解析出的媒体 ID，避免点击下载时重复解析
 - 服务端解析视频，浏览器直接下载 MP4
-- 不需要登录，不保存下载记录
-- 适配桌面端和手机端
+- 飞书 `wiki` / `docx` 文档链接：打开文档播放视频后，使用配套 Chrome 扩展保存已加载的 MP4
+- 不保存下载记录；抖音无需登录，飞书使用浏览器已有的登录状态
+- 抖音网页适配桌面端和手机端；飞书扩展需桌面版 Chrome
+
+## 飞书扩展安装
+
+从网站下载 `feishu-extension.zip` 并解压。Chrome 打开 `chrome://extensions`，开启“开发者模式”，点击“加载已解压的扩展程序”，选择解压得到的 `extension` 文件夹。然后在已登录的飞书文档里播放视频，点击扩展图标和“下载当前视频”。扩展仅在 `*.feishu.cn` 页面观察视频请求，下载由 Chrome 在本机完成，不读取或上传 Cookie。
+
+扩展目前识别飞书文档中已播放的直链 MP4，每个标签页仅保留最近播放的一条；重新播放可刷新识别结果。它不支持任意网站、未授权内容、DRM 或受播放保护的视频。
 
 ## 本地运行
 
@@ -33,7 +40,7 @@ npm run build
 
 ## 实现方式
 
-项目使用 React、Vinext、Tailwind CSS 和 Cloudflare Workers。服务器只接受抖音域名，解析公开分享页中的视频信息，再以流式响应返回视频文件。
+项目保留 React / Vinext 本地界面；线上 Netlify 使用 `netlify-static/index.html` 和 `netlify/functions/video.ts`。服务器只接受抖音域名，解析公开分享页中的视频信息；飞书视频不经过服务器，由 `extension/` 的 Chrome 扩展在用户浏览器内处理。
 
 ## 使用说明
 
@@ -41,5 +48,5 @@ npm run build
 
 本项目与抖音及字节跳动无关联。
 
-链接与解析回归检查：`node --experimental-strip-types lib/douyin.test.ts`。
-本工具支持上述抖音链接形式，不代表支持所有平台或绕过私密、登录及地区限制。上游限流或验证仍可能导致失败。
+链接与解析回归检查：`node --experimental-strip-types lib/douyin.test.ts`；扩展地址检查：`node extension/media.test.mjs`。
+本工具只支持上述抖音及飞书链接形式，不代表支持所有平台或绕过私密、登录及地区限制。上游限流或验证仍可能导致失败。

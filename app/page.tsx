@@ -9,6 +9,12 @@ import { Input } from '@/components/ui/input';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 type Video = { id: string; title: string; downloadUrl: string };
+type FeishuVideo = { feishu: true; url: string };
+
+function feishuLink(text: string) {
+  const match = text.match(/(?:https?:\/\/)?[a-z0-9-]+\.feishu\.cn\/(?:wiki|docx)\/[A-Za-z0-9]+(?:#[A-Za-z0-9-]+)?/i);
+  return match ? new URL(/^https?:/i.test(match[0]) ? match[0] : `https://${match[0]}`).href : null;
+}
 
 type ModelContext = {
   registerTool(tool: {
@@ -25,7 +31,7 @@ export default function Home() {
   const [url, setUrl] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
-  const [video, setVideo] = useState<Video | null>(null);
+  const [video, setVideo] = useState<Video | FeishuVideo | null>(null);
 
   async function resolveVideo(input: string) {
     setStatus('loading');
@@ -51,6 +57,14 @@ export default function Home() {
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
+      const link = feishuLink(url);
+      if (link) {
+        setVideo({ feishu: true, url: link });
+        setStatus('ready');
+        setMessage('打开飞书文档并播放视频，然后点击浏览器中的扩展图标');
+        return;
+      }
+      if (/feishu\.cn/i.test(url)) throw new Error('请粘贴飞书 wiki 或 docx 文档链接');
       await resolveVideo(url);
     } catch (error) {
       setStatus('error');
@@ -97,17 +111,17 @@ export default function Home() {
 
       <section className="relative mx-auto grid min-h-[calc(100vh-88px)] w-full max-w-6xl place-items-center px-5 pb-16 sm:px-8">
         <div className="w-full max-w-3xl">
-          <p className="eyebrow">DOUYIN VIDEO DOWNLOADER / 01</p>
+          <p className="eyebrow">VIDEO DOWNLOADER / 01</p>
           <h1 className="mt-5 max-w-2xl font-heading text-[clamp(3.2rem,9vw,7rem)] font-black leading-[0.88] tracking-[-0.075em]">
             贴链接，<br /><span>拿视频。</span>
           </h1>
           <p className="mt-7 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
-            短链接、视频页链接、完整分享文案，都可以直接粘贴。自动提取其中的抖音视频链接。
+            抖音链接、分享文案或飞书文档链接，都可以直接粘贴。
           </p>
 
           <form onSubmit={handleSubmit} className="download-panel mt-10">
             <label htmlFor="video-url" className="mb-3 block text-sm font-medium text-zinc-300">
-              抖音链接或分享文案
+              视频链接或分享文案
             </label>
             <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
@@ -120,7 +134,7 @@ export default function Home() {
                   value={url}
                   disabled={status === 'loading'}
                   onChange={(event) => { setUrl(event.target.value); setVideo(null); setStatus('idle'); setMessage(''); }}
-                  placeholder="粘贴链接，或直接粘贴抖音分享文案"
+                  placeholder="粘贴抖音或飞书文档链接"
                   className="h-14 rounded-none border-zinc-700 bg-zinc-950 pl-12 text-base text-white placeholder:text-zinc-600 focus-visible:border-orange-500 focus-visible:ring-orange-500/30"
                 />
               </div>
@@ -138,18 +152,21 @@ export default function Home() {
             {video && (
               <div className="result-card mt-5 flex flex-col gap-4 border-t border-zinc-800 pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-zinc-100">{video.title}</p>
-                  <p className="mt-1 font-mono text-xs text-zinc-500">ID {video.id}</p>
+                  <p className="truncate font-medium text-zinc-100">{'feishu' in video ? '飞书文档视频' : video.title}</p>
+                  <p className="mt-1 font-mono text-xs text-zinc-500">{'feishu' in video ? '需在已登录的 Chrome 页面播放' : `ID ${video.id}`}</p>
                 </div>
-                <a href={video.downloadUrl} className={buttonVariants({ className: 'h-11 shrink-0 rounded-none bg-white px-5 font-bold text-black hover:bg-zinc-200' })}>
-                  <ArrowDownToLine /> 下载 MP4
+                <a href={'feishu' in video ? video.url : video.downloadUrl} target={'feishu' in video ? '_blank' : undefined} rel={'feishu' in video ? 'noopener noreferrer' : undefined} className={buttonVariants({ className: 'h-11 shrink-0 rounded-none bg-white px-5 font-bold text-black hover:bg-zinc-200' })}>
+                  <ArrowDownToLine /> {'feishu' in video ? '打开飞书文档' : '下载 MP4'}
                 </a>
               </div>
             )}
           </form>
 
+          <div className="mt-7 border border-zinc-700 p-4 text-sm leading-6 text-zinc-400">
+            飞书视频需要 <a className="text-white underline" href="/feishu-extension.zip" download>下载 Chrome 扩展</a>并解压，在 <code>chrome://extensions</code> 开启开发者模式并加载解压后的 <code>extension</code> 文件夹。播放文档中的视频后，点击扩展图标下载。
+          </div>
           <div className="mt-7 flex items-start gap-3 border-l-2 border-zinc-700 pl-4 text-sm leading-6 text-zinc-500">
-            <span>请仅下载你有权保存的内容。私密、已删除或受地区限制的视频无法解析。</span>
+            <span>请仅保存你有权下载的内容。私密、受地区限制或播放保护的视频可能无法保存。</span>
           </div>
         </div>
       </section>
